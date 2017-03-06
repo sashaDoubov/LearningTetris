@@ -1,3 +1,4 @@
+package tetris_2;
 // JBoardTest.java
 
 import java.awt.*;
@@ -149,8 +150,8 @@ class JBoardTest extends JComponent {
 				int result = board.place(newPiece, newX, newY);
 				
 				// TEMPP
-				System.out.println("RESULT");
-				System.out.println(result);
+				//System.out.println("RESULT");
+				//System.out.println(result);
 				
 				
 				// See if it worked

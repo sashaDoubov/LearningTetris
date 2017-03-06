@@ -1,3 +1,4 @@
+package tetris_2;
 //BadBrain.java
 /**
  A joke implementation based on LameBrain --

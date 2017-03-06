@@ -1,3 +1,4 @@
+package tetris_2;
 // JPieceTest.java
 
 import java.awt.*;

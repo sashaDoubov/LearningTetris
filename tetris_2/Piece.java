@@ -1,3 +1,4 @@
+package tetris_2;
 // Piece.java
 
 import java.awt.*;

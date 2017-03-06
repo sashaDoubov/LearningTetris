@@ -1,3 +1,4 @@
+package tetris_2;
 // Brain.java -- the interface for Tetris brains
 
 public interface Brain {

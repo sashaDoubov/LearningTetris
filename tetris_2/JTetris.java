@@ -1,3 +1,4 @@
+package tetris_2;
 // JTetris.java
 import java.awt.*;
 import javax.swing.*;
@@ -207,7 +208,7 @@ public class JTetris extends JComponent {
 	 Sets the enabling of the start/stop buttons
 	 based on the gameOn state.
 	*/
-	private void enableButtons() {
+	protected void enableButtons() {
 	    startButton.setEnabled(!gameOn);
 	    stopButton.setEnabled(gameOn);
 	}
@@ -642,8 +643,8 @@ public class JTetris extends JComponent {
 		
 		// Could create a JTetris or JBrainTetris here
 		final int pixels = 16;
-		JTetris tetris = new JTetris(WIDTH*pixels+2, (HEIGHT+TOP_SPACE)*pixels+2);
 		
+		JTetris tetris = new JTetris(WIDTH*pixels+2, (HEIGHT+TOP_SPACE)*pixels+2);
 		
 		container.add(tetris, BorderLayout.CENTER);
 
