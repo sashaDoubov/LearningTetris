@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -24,7 +25,11 @@ import tetris_2.JTetris;
 public class JBrainTetris extends JTetris {
 	
 	protected JCheckBox activeBrain;
-	LameBrain brainInst = new LameBrain();
+    protected JTextField brainText;
+    protected JLabel status;
+    protected JButton loadBrain;
+
+	Brain brainInst;
 	private int brainCount = 0;
 	
 	Brain.Move optimalMove = new Brain.Move();
@@ -32,136 +37,67 @@ public class JBrainTetris extends JTetris {
 	JBrainTetris(int width, int height) {
 		super(width, height);
 	}
-
-	public void tick(int verb) {
-//		if (verb == DOWN){
-//			if (count != brainCount){
-//				optimalMove = brainInst.bestMove(board, currentPiece, HEIGHT , optimalMove);
-//				board.undo();
-//				brainCount = count;
-//			}
-//		
-//		if (optimalMove != null)
-//		{
-//			if (!currentPiece.equals(optimalMove.piece))
-//			{
-//				currentPiece = currentPiece.nextRotation();
-//			}
-//			
-//			if (currentX  < optimalMove.x){
-//				currentX++;
-//			}
-//			else if (currentX > optimalMove.x){
-//				currentX--;
-//			}
-//		}
-//		}
-//		
-//		super.tick(verb);
-		
-		 switch (verb) {
-	        case LEFT:
-	            ;
-	        case RIGHT:
-	            ;
-	        case DROP:
-	            ;
-	        case ROTATE:
-	            super.tick(verb);
-	            return;
-	        case DOWN:
-	            break;
-	        }
-
-	            if (count != brainCount) {
-	                board.undo();
-	                brainCount = count;
-	                optimalMove = brainInst
-	                        .bestMove(board, currentPiece, HEIGHT, optimalMove);
-	            }
-
-	            if (optimalMove == null) {
-	                return;
-	            }
-
-	            if (!optimalMove.piece.equals(currentPiece)) {
-	                super.tick(ROTATE);
-	            }
-
-	            if (optimalMove.x > currentX) {
-	                super.tick(RIGHT);
-	            } else if (optimalMove.x < currentX) {
-	                super.tick(LEFT);
-	            } else if (optimalMove.piece.equals(currentPiece)) {
-	                super.tick(DROP);
-	                super.tick(DOWN);
-	            }
-
-
-	        super.tick(DOWN);
-	}
+	
 	public java.awt.Container createControlPanel() {
-		java.awt.Container panel = Box.createVerticalBox();
-
-		// COUNT
-		countLabel = new JLabel("0");
-		panel.add(countLabel);
+		java.awt.Container panel = super.createControlPanel();
 		
-		// TIME 
-		timeLabel = new JLabel(" ");
-		panel.add(timeLabel);
-
 		panel.add(Box.createVerticalStrut(12));
+        JPanel row = new JPanel();
+        loadBrain = new JButton("Load brain");
+        row.add(loadBrain);
+        brainText = new JTextField();
+        brainText.setPreferredSize(new Dimension(100, 20));
+        row.add(brainText);
+        panel.add(row);
+        
+        loadBrain.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+        try {
+        Class bClass = Class.forName(this.getClass().getPackage().getName() 
+        		+ "." + brainText.getText());
+        brainInst = (Brain) bClass.newInstance();
+        // -- use b as new brain --
+        }
+        catch (Exception ex) {
+        ex.printStackTrace();
+        }
+        }
+        });
+        
+		return (panel);
 		
-		// START button
-		startButton = new JButton("Start");
-		panel.add(startButton);
-		startButton.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				startGame();
+	}
+	public void tick(int verb) {
+		
+		if (verb == DOWN){
+			if (count != brainCount){
+				board.undo();
+				brainCount = count;
+				optimalMove = brainInst.bestMove(board, currentPiece, HEIGHT , optimalMove);
 			}
-		});
 		
-		// STOP button
-		stopButton = new JButton("Stop");
-		panel.add(stopButton);
-		stopButton.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				stopGame();
+		if (optimalMove == null)
+			return;
+		
+			if (!currentPiece.equals(optimalMove.piece))
+			{
+				super.tick(ROTATE);
 			}
-		});
-		
-		// add checkbox
-		
-		activeBrain = new JCheckBox("Brain");
-		panel.add(activeBrain);
-		if (testMode)
-			activeBrain.setSelected(true);
-		
-		enableButtons();
-		
-		JPanel row = new JPanel();
-		
-		// SPEED slider
-		panel.add(Box.createVerticalStrut(12));
-		row.add(new JLabel("Speed:"));
-		speed = new JSlider(0, 200, 75);	// min, max, current
-		speed.setPreferredSize(new Dimension(100,15));
-		if (testMode) speed.setValue(200);	// max for test mode
-		
-		updateTimer();
-		row.add(speed);
-		
-		panel.add(row);
-		speed.addChangeListener( new ChangeListener() {
-			// when the slider changes, sync the timer to its value
-			public void stateChanged(ChangeEvent e) {
-				updateTimer();
+			
+			if (optimalMove.x  >  currentX){
+				super.tick(RIGHT);
 			}
-		});
+			else if (optimalMove.x < currentX){
+				super.tick(LEFT);
+			}
+			else if (optimalMove.piece.equals(currentPiece))
+			{
+				super.tick(DROP);
+				super.tick(DOWN);
+			}
+		}
 		
-		
-		return(panel);
+		super.tick(verb);
 	}
 	
 	/**
