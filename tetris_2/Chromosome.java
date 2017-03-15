@@ -1,7 +1,7 @@
 package tetris_2;
 
 public class Chromosome {
-	private double features[];
+	public double features[];
 	private int featLength;
 	
 	public Chromosome(int n)
@@ -13,12 +13,12 @@ public class Chromosome {
 	{
 		return features[i];
 	}
-	public int getFeatLenght()
+	public int getFeatLength()
 	{
 		return featLength;
 	}
 	
-	public void randomInit(int Min, int Max) {
+	public void randomInit(double Min, double Max) {
 		for (int i = 0; i < featLength; i++)
 		{
 			features[i] = Min + (Math.random() * ((Max - Min) + 1));
@@ -39,14 +39,14 @@ public class Chromosome {
 		return par1;
 	}
 	
-	public void mutate(int Max, int Min)
+	public void mutate(double d, double e)
 	{
 		for (int i = 0; i < featLength; i++)
 		{
 			// 1 % mutation rate
 			if (Math.random() < 0.01)
 			{
-				features[i] += Min + (int)(Math.random() * ((Max - Min) + 1));
+				features[i] += e + (int)(Math.random() * ((d - e) + 1));
 			}
 		}
 	}

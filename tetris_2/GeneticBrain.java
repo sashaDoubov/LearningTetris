@@ -24,12 +24,7 @@ public class GeneticBrain implements Brain {
 	
 	public void loadBrain(Chromosome chr)
 	{
-		feats = new double[chr.getFeatLenght()];
-		for (int i = 0; i < chr.getFeatLenght(); i++)
-		{
-			feats[i] = chr.getFeat(i);
-			System.out.println(feats[i]);
-		}
+		feats = chr.features;
 	}
 	
 	public Brain.Move bestMove(Board board, Piece piece, int limitHeight, Brain.Move move) {

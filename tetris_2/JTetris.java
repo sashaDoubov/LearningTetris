@@ -82,9 +82,8 @@ public class JTetris extends JComponent {
 	protected JButton stopButton;
 	protected javax.swing.Timer timer;
 	protected JSlider speed;
-	
 	public final int DELAY = 400;	// milliseconds per tick
-	
+	protected JLabel scoreLabel;
 
 	JTetris(int width, int height) {
 		super();
@@ -94,7 +93,6 @@ public class JTetris extends JComponent {
 		
 		pieces = Piece.getPieces();
 		board = new Board(WIDTH, HEIGHT + TOP_SPACE);
-
 
 		/*
 		 Register key handlers that call
@@ -390,7 +388,9 @@ public class JTetris extends JComponent {
 		
 		// if row clearing is going to happen, draw the
 		// whole board so the green row shows up
-		if (result ==  Board.PLACE_ROW_FILLED) repaint();
+		if (result ==  Board.PLACE_ROW_FILLED){
+			repaint();
+		}
 		
 
 
@@ -409,8 +409,8 @@ public class JTetris extends JComponent {
 		 "landed" position, so we're done with the falling of this piece.
 		*/
 		if (failed && verb==DOWN && !moved) {	// it's landed
-		
 			if (board.clearRows()) {
+				scoreLabel.setText(Integer.toString(board.getScore()));
 			    repaint();	// repaint to show the result of the row clearing
 			}
 			
@@ -569,6 +569,10 @@ public class JTetris extends JComponent {
 		countLabel = new JLabel("0");
 		panel.add(countLabel);
 		
+		// SCORE
+		scoreLabel = new JLabel("Score:");
+		panel.add(scoreLabel);
+		
 		// TIME 
 		timeLabel = new JLabel(" ");
 		panel.add(timeLabel);
@@ -652,7 +656,6 @@ public class JTetris extends JComponent {
 		if (args.length != 0 && args[0].equals("test")) {
 			tetris.testMode = true;
 		}
-		
 		Container panel = tetris.createControlPanel();
 		
 		// Add the quit button last so it's at the bottom
