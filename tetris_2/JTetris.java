@@ -276,10 +276,10 @@ public class JTetris extends JComponent {
 	public void addNewPiece() {
 		count++;
 		
-		if (testMode && count == TEST_LIMIT+1) {
+		/*if (testMode && count == TEST_LIMIT+1) {
 			 stopGame();
 			 return;
-		}
+		}*/
 
 		Piece piece = pickNextPiece();
 		

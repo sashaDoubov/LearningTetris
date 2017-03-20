@@ -1,31 +1,13 @@
 package tetris_2;
-// LameBrain.java
 
-/**
- A simple Brain implementation.
- bestMove() iterates through all the possible x values
- and rotations to play a particular piece (there are only
- around 10-30 ways to play a piece).
- 
- For each play, it uses the rateBoard() message to rate how
- good the resulting board is and it just remembers the
- play with the lowest score. Undo() is used to back-out
- each play before trying the next. To experiment with writing your own
- brain -- just subclass off LameBrain and override rateBoard().
-*/
-
-public class GeneticBrain implements Brain {
+public class EvolvedBrain implements Brain {
 	/**
 	 Given a piece and a board, returns a move object that represents
 	 the best play for that piece, or returns null if no play is possible.
 	 See the Brain interface for details.
 	*/
-	public double feats[];
+	public double feats[] = {-46.694474994819245, 12.722448967648717, 69.85947756237444, -22.090461696501393};
 	
-	public void loadBrain(Chromosome chr)
-	{
-		feats = chr.features;
-	}
 	
 	public Brain.Move bestMove(Board board, Piece piece, int limitHeight, Brain.Move move) {
 		// Allocate a move object if necessary
@@ -119,8 +101,6 @@ public class GeneticBrain implements Brain {
 		// Add up the counts to make an overall score
 		// The weights, 8, 40, etc., are just made up numbers that appear to work
 		
-		//  
-		return (feats[0]*maxHeight + feats[1]*avgHeight + feats[2]*holes + feats[3]*clearedRows);	
+		return (feats[0]*maxHeight + feats[1]*avgHeight + feats[2]*holes +feats[3]*clearedRows );	
 	}
-
 }

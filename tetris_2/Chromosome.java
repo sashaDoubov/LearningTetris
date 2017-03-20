@@ -1,5 +1,7 @@
 package tetris_2;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Chromosome {
 	public double features[];
 	private int featLength;
@@ -26,27 +28,53 @@ public class Chromosome {
 	}
 	
 	// random cross-over
-	public static Chromosome crossOver(Chromosome par1, Chromosome par2)
+	public static Chromosome randomCrossOver(Chromosome par1, Chromosome par2)
 	{
+		Chromosome chr = new Chromosome(par1.getFeatLength());
 		for (int i = 0; i < par1.features.length; i++)
 		{
 			// 60 % crossover rate
 			if (Math.random() < 0.6)
 			{
-				par1.features[i] = par2.getFeat(i);
+				chr.features[i] = par1.features[i];			
+			}
+			else
+			{
+				chr.features[i] = par2.features[i];
 			}
 		}
-		return par1;
+		return chr;
 	}
 	
-	public void mutate(double d, double e)
+	public static Chromosome singleCrossOver(Chromosome par1, Chromosome par2)
+	{
+		Chromosome chr = new Chromosome(par1.getFeatLength());
+		int randomNum = ThreadLocalRandom.current().nextInt(0, par1.getFeatLength() + 1);
+		//System.out.println("random num: " + randomNum);
+		
+		for (int i = 0; i < par1.getFeatLength(); i++)
+		{
+			// 60 % crossover rate
+			if (i < randomNum)
+			{
+				chr.features[i] = par1.features[i];			
+			}
+			else
+			{
+				chr.features[i] = par2.features[i];
+			}
+		}
+		return chr;
+	}
+	
+	public void mutate(double max, double min)
 	{
 		for (int i = 0; i < featLength; i++)
 		{
 			// 1 % mutation rate
 			if (Math.random() < 0.01)
 			{
-				features[i] += e + (int)(Math.random() * ((d - e) + 1));
+				features[i] += min + (int)(Math.random() * ((max - min) + 1));
 			}
 		}
 	}

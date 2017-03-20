@@ -7,8 +7,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -39,15 +41,33 @@ public class GeneticTetris extends JTetris {
 	Population populationBrains;
 	private int currentBrainIndex = 0;
 	private int brainCount = 0;
+	//private Random originalRandom;
 	
 	private int populationGeneration = 0;
 	Brain.Move optimalMove;
+	private boolean firstInGeneration;
+	private int populationSize;
 	
 	GeneticTetris(int width, int height) {
 		super(width, height);
-		populationBrains = new Population(10,4);
+		populationSize = 100;
+		
+		populationBrains = new Population(populationSize,4);
 		populationBrains.randPop();
+		
+		// wipe text file
+		PrintWriter pw = null;
+		try {
+			pw = new PrintWriter("jam.txt");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		pw.close();
+		
+		random = new Random(0);
 	}
+	
 	public java.awt.Container createControlPanel() {
 		Container panel = super.createControlPanel();
 
@@ -60,6 +80,7 @@ public class GeneticTetris extends JTetris {
 		
 		if (testMode) speed.setValue(100);	// max for test mode
 		return panel;
+		
 	}
 	public void tick(int verb) {
 		if (verb == DOWN){
@@ -98,7 +119,6 @@ public class GeneticTetris extends JTetris {
 		// load new features into brain
 		brainInst.loadBrain(populationBrains.population[currentBrainIndex]);
 
-		
 		// cheap way to reset the board state
 		board = new Board(WIDTH, HEIGHT + TOP_SPACE);
 		
@@ -107,18 +127,7 @@ public class GeneticTetris extends JTetris {
 		
 		count = 0;
 		gameOn = true;
-		
-		// keep for each population
-		random = new Random(populationGeneration);
-		
-		/*if (testMode){
-			// same sequence for each generation
-			random = new Random(populationGeneration);	// same seq every time
-		}
-		else {
-				random = new Random();	// diff seq each game
-		}*/
-		
+
 		enableButtons();
 		timeLabel.setText(" ");
 		addNewPiece();
@@ -132,14 +141,78 @@ public class GeneticTetris extends JTetris {
 		currentBrainIndex++;
 		if (currentBrainIndex < populationBrains.population.length)
 		{
-			populationBrains.scores[currentBrainIndex] = board.getScore();
-			//System.out.println("board score " + board.getScore());
+			//random = new Random(populationGeneration * (1 << 50));
+			random = new Random(0);
+			//populationBrains.scores[currentBrainIndex] = board.getScore();
+			populationBrains.scores[currentBrainIndex] = count;
 			startGame();
 		}
-		else if (populationGeneration < 10)
+		else if (populationGeneration < 100)
 		{
+			// keep for each population
 			currentBrainIndex = 0;
 			
+			if (testMode){
+				try{
+					BufferedWriter out = new BufferedWriter(new FileWriter("jam.txt",true));
+					out.newLine();
+					out.write("Generation " + populationGeneration);
+					
+					for (int i = 0; i < populationBrains.population.length; i++)
+					{
+						out.newLine();
+						for (int j = 0; j < populationBrains.population[i].getFeatLength(); j++)
+						{
+							out.write(Double.toString(populationBrains.population[i].features[j]) + " ");
+						}
+						out.newLine();
+						out.write("score " + populationBrains.scores[i]);
+					}
+					double sum = 0;
+					for (int i :  populationBrains.scores)
+					{
+						sum += i;
+					}
+					 sum = sum/(double)populationBrains.scores.length;
+					System.out.println(sum);
+					out.newLine();
+					out.write("g_score = " + sum);
+					
+					out.close();
+				}
+				catch(IOException e){}
+			}
+			
+			int eliteOffset = (int)0.1 * populationSize;
+			Population populationBrainsTemp = new Population(populationSize,4);
+			
+			
+			populationBrains.fitSum(populationBrains.scores);
+			for (int i = eliteOffset + 1; i < populationBrains.population.length; i++)
+			{
+				Chromosome par1;
+				Chromosome par2;
+				if (populationGeneration < -1){
+					par1 = populationBrains.rouletteSelection(populationBrains.ranking);
+					par2 = populationBrains.rouletteSelection(populationBrains.ranking);
+				}
+				else
+				{
+					par1 = populationBrains.rouletteSelection(populationBrains.scores);
+					par2 = populationBrains.rouletteSelection(populationBrains.scores);
+				}
+				
+				//populationBrainsTemp.population[i] = Chromosome.randomCrossOver(par1, par2);
+				populationBrainsTemp.population[i] = Chromosome.singleCrossOver(par1, par2);
+				populationBrainsTemp.population[i].mutate(-0.05, 0.05);
+			}
+			
+			populationBrains = populationBrainsTemp;
+			populationGeneration++;
+			startGame();
+		}
+		else
+		{
 			int eliteScore = -1;
 			int eliteIndex = -1;
 			for (int i = 0; i < populationBrains.population.length; i++)
@@ -150,48 +223,8 @@ public class GeneticTetris extends JTetris {
 					eliteIndex = i;
 				}
 			}
-			
-			
-
-			try{
-				BufferedWriter out = new BufferedWriter(new FileWriter("file.txt",true));
-				out.newLine();
-				out.write("Generation " + populationGeneration);
-				
-				for (int i = 0; i < populationBrains.population.length; i++)
-				{
-					out.newLine();
-					for (int j = 0; j < populationBrains.population[i].getFeatLength(); j++)
-					{
-						out.write(Double.toString(populationBrains.population[i].features[j]) + " ");
-					}
-					out.newLine();
-					out.write("score " + populationBrains.scores[i]);
-				}
-				
-				out.close();
-			}
-			catch(IOException e){}
-			
-			
-			
-			Population populationBrainsTemp = new Population(10,4);
-			
-			populationBrainsTemp.population[0] = populationBrains.population[eliteIndex];
-			
-			for (int i = 1; i < populationBrains.population.length; i++)
-			{
-				Chromosome par1 = populationBrains.rouletteSelection();
-				Chromosome par2 = populationBrains.rouletteSelection();
-				
-				populationBrainsTemp.population[i] = Chromosome.crossOver(par1, par2);
-				
-				populationBrainsTemp.population[i].mutate(-0.05, 0.05);
-			}
-			
-			populationBrains = populationBrainsTemp;
-			populationGeneration++;
-			startGame();
+			System.out.println("eliteScore: " + eliteScore);
+			System.out.println("elite features: " + populationBrains.population[eliteIndex].features);
 		}
 	}
 	/**
