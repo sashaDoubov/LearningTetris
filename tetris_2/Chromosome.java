@@ -2,14 +2,16 @@ package tetris_2;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Chromosome {
+public class Chromosome implements Comparable<Chromosome>{
 	public double features[];
 	private int featLength;
+	public int score;
 	
 	public Chromosome(int n)
 	{
 		features = new double[n];
 		featLength = n;
+		score = 0;
 	}
 	public double getFeat(int i)
 	{
@@ -78,4 +80,20 @@ public class Chromosome {
 			}
 		}
 	}
+	
+	public void setScore(int sc)
+	{
+		score = sc;
+	}
+	public int getScore()
+	{
+		return score;
+	}
+	@Override
+	public int compareTo(Chromosome otherChromo) {
+		// TODO Auto-generated method stub
+		return Integer.compare(otherChromo.getScore(), this.score);
+	}
+	
+	
 }

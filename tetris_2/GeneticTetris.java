@@ -135,19 +135,18 @@ public class GeneticTetris extends JTetris {
 		startTime = System.currentTimeMillis();
 	}
 	public void stopGame()
-	{
+	{		
 		super.stopGame();
-		
+		random = new Random((int)(populationGeneration / 3) * (1 << 50));
+		//random = new Random(0);
+		//populationBrains.scores[currentBrainIndex] = board.getScore();
+		populationBrains.population[currentBrainIndex].setScore(count);
 		currentBrainIndex++;
-		if (currentBrainIndex < populationBrains.population.length)
-		{
-			//random = new Random(populationGeneration * (1 << 50));
-			random = new Random(0);
-			//populationBrains.scores[currentBrainIndex] = board.getScore();
-			populationBrains.scores[currentBrainIndex] = count;
+		
+		if (currentBrainIndex < populationBrains.population.length){
 			startGame();
 		}
-		else if (populationGeneration < 100)
+		else if (populationGeneration < 300)
 		{
 			// keep for each population
 			currentBrainIndex = 0;
@@ -166,14 +165,16 @@ public class GeneticTetris extends JTetris {
 							out.write(Double.toString(populationBrains.population[i].features[j]) + " ");
 						}
 						out.newLine();
-						out.write("score " + populationBrains.scores[i]);
+						out.write("score " + populationBrains.population[i].getScore());
 					}
 					double sum = 0;
-					for (int i :  populationBrains.scores)
+					for (int i = 0; i < populationSize; i++)
 					{
-						sum += i;
+						if (populationBrains.population[i].getScore() == 0)
+							System.out.println("WHHAT");
+						sum += populationBrains.population[i].getScore();
 					}
-					 sum = sum/(double)populationBrains.scores.length;
+					 sum = sum/(double)populationSize;
 					System.out.println(sum);
 					out.newLine();
 					out.write("g_score = " + sum);
@@ -183,24 +184,26 @@ public class GeneticTetris extends JTetris {
 				catch(IOException e){}
 			}
 			
-			int eliteOffset = (int)0.1 * populationSize;
+			int eliteOffset = (int)(0.15 * populationSize);
+			System.out.println("elite" + eliteOffset);
 			Population populationBrainsTemp = new Population(populationSize,4);
 			
+			Chromosome[] tempChr = populationBrains.population;
+			Arrays.sort(tempChr);
 			
-			populationBrains.fitSum(populationBrains.scores);
-			for (int i = eliteOffset + 1; i < populationBrains.population.length; i++)
+			for (int i = 0; i < eliteOffset; i++)
+			{
+				//System.out.println("sorted" +  tempChr[i].getScore());
+				populationBrainsTemp.population[i] = tempChr[i];
+			}
+			
+			populationBrains.fitSum();
+			for (int i = eliteOffset; i < populationBrains.population.length; i++)
 			{
 				Chromosome par1;
 				Chromosome par2;
-				if (populationGeneration < -1){
-					par1 = populationBrains.rouletteSelection(populationBrains.ranking);
-					par2 = populationBrains.rouletteSelection(populationBrains.ranking);
-				}
-				else
-				{
-					par1 = populationBrains.rouletteSelection(populationBrains.scores);
-					par2 = populationBrains.rouletteSelection(populationBrains.scores);
-				}
+				par1 = populationBrains.rouletteSelection();
+				par2 = populationBrains.rouletteSelection();
 				
 				//populationBrainsTemp.population[i] = Chromosome.randomCrossOver(par1, par2);
 				populationBrainsTemp.population[i] = Chromosome.singleCrossOver(par1, par2);
@@ -217,14 +220,19 @@ public class GeneticTetris extends JTetris {
 			int eliteIndex = -1;
 			for (int i = 0; i < populationBrains.population.length; i++)
 			{
-				if (populationBrains.scores[i] > eliteScore)
+				if (populationBrains.population[i].getScore() > eliteScore)
 				{
-					eliteScore = populationBrains.scores[i];
+					eliteScore = populationBrains.population[i].getScore();
 					eliteIndex = i;
 				}
 			}
 			System.out.println("eliteScore: " + eliteScore);
-			System.out.println("elite features: " + populationBrains.population[eliteIndex].features);
+			
+			System.out.println("elite features: ");
+			for (int i = 0; i < populationBrains.population[eliteIndex].features.length; i++)
+			{
+				System.out.println(populationBrains.population[eliteIndex].features[i] + " ");
+			}
 		}
 	}
 	/**
